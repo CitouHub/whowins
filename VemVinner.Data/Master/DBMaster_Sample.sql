@@ -67,6 +67,7 @@ INSERT INTO [GroupUser](GroupId, UserId) VALUES (1, 2)
 INSERT INTO [GroupUser](GroupId, UserId) VALUES (1, 3)
 INSERT INTO [GroupUser](GroupId, UserId) VALUES (1, 4)
 INSERT INTO [GroupUser](GroupId, UserId) VALUES (1, 5)
+INSERT INTO [GroupUser](GroupId, UserId) VALUES (1, 6)
 
 INSERT INTO [GroupUser](GroupId, UserId) VALUES (2, 1)
 INSERT INTO [GroupUser](GroupId, UserId) VALUES (2, 10)

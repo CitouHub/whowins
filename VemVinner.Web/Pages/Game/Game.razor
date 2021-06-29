@@ -60,7 +60,7 @@
             </table>
         </div>
     }
-    else
+    else if(initializing == false)
     {
         <h3>Inga registrerade omgångar</h3>
         <div class="control">
@@ -75,6 +75,7 @@
     [Parameter]
     public int gameId { get; set; }
 
+    private bool initializing = true;
     private GameDTO game = new GameDTO();
     private List<GroupGameUserPlacementDTO> groupGameUserPlacements = new List<GroupGameUserPlacementDTO>();
     private List<GroupGameEventDTO> groupGameEvents = new List<GroupGameEventDTO>();
@@ -88,6 +89,7 @@
         game = await GameService.GetGame(gameId);
         groupGameUserPlacements = await GameService.GetGroupGameUserPlacements(groupId, gameId);
         groupGameEvents = await GameService.GetGroupGameEvents(groupId, gameId, 10);
+        initializing = false;
     }
 
     protected override void OnAfterRender(bool firstRender)
