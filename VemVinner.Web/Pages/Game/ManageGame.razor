@@ -1,0 +1,128 @@
+﻿@page "/manage/game/{groupId:int?}/{gameId:int?}"
+
+@using VemVinner.Service
+@using VemVinner.Domain
+@using BlazorInputFile
+
+@attribute [Authorize]
+@inject IAccountService AccountService
+@inject IGameService GameService
+@inject IAlertService AlertService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="card">
+        <h4 class="card-header">@(gameId != null ? "Uppdatera spel" : "Skapa nytt spel")</h4>
+        <div class="card-body">
+            <EditForm Model="@game" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label>Namn</label>
+                    <InputText @bind-Value="game.Name" class="form-control" />
+                    <ValidationMessage For="@(() => game.Name)" />
+                </div>
+                <div class="form-group">
+                    <label>Beskrivning</label>
+                    <InputText @bind-Value="game.Description" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => game.Description)" />
+                </div>
+                <div class="form-group">
+                    <label>Välj profilbild</label>
+                    <div>
+                        @foreach (var gameProfile in GameProfiles)
+                        {
+                            <img class="@(game.ProfilePictureURL == gameProfile ? "selected-profile" : "")" src="@gameProfile" @onclick="@(() => game.ProfilePictureURL = gameProfile)" />
+                        }
+                    </div>
+                    <ValidationMessage For="@(() => game.ProfilePictureURL)" />
+                </div>
+                <button disabled="@loading" class="btn btn-primary">
+                    @if (loading)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    @(gameId == null ? "Skapa" : "Uppdatera")
+                </button>
+                <NavLink href="@previousUrl" class="btn btn-link">Avbryt</NavLink>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? groupId { get; set; }
+    [Parameter]
+    public int? gameId { get; set; }
+
+    const string DefaultStatus = "Ladda upp en bild till spelets";
+    const int MaxFileSize = 1 * 1024 * 1024;
+    string status = DefaultStatus;
+
+    private List<string> GameProfiles = new List<string>()
+    {
+    "/images/game/game1.png",
+    "/images/game/game2.png",
+    "/images/game/game3.png",
+    "/images/game/game4.png",
+    "/images/game/game5.png",
+    "/images/game/game6.png",
+    "/images/game/game7.png",
+    "/images/game/game8.png",
+    "/images/game/game9.png",
+    "/images/game/game10.png",
+    "/images/game/game11.png",
+    "/images/game/game12.png"
+};
+
+    private GameDTO game = new GameDTO();
+    private List<IBrowserFile> loadedFiles = new();
+    private bool loading;
+    private string previousUrl = "/";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (gameId != null)
+        {
+            game = await GameService.GetGame((int)gameId);
+        }
+        if (groupId != null && gameId != null)
+        {
+            previousUrl = $"/game/{groupId}/{gameId}";
+        }
+    }
+
+    private async void OnValidSubmit()
+    {
+        AlertService.Clear();
+
+        loading = true;
+        StateHasChanged();
+
+        if (game.Id == null)
+        {
+            var gameExists = await GameService.GameExists(game.Name);
+            if (gameExists == false)
+            {
+                await GameService.AddGame(AccountService.User.Id, game);
+                AlertService.Success("Spel skapad", keepAfterRouteChange: true);
+
+                NavigationManager.NavigateTo(previousUrl);
+            }
+            else
+            {
+                AlertService.Error("Spelet finns redan");
+            }
+        }
+        else
+        {
+            await GameService.UpdateGame(AccountService.User.Id, game);
+            AlertService.Success("Spel uppdaterat", keepAfterRouteChange: true);
+
+            NavigationManager.NavigateTo(previousUrl);
+        }
+
+        loading = false;
+        StateHasChanged();
+    }
+}

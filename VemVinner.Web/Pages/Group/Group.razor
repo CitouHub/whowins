@@ -1,0 +1,68 @@
+﻿@page "/group/{groupId:int}"
+
+@using VemVinner.Service;
+@using VemVinner.Domain;
+@using VemVinner.Domain.Account;
+
+@attribute [Authorize]
+@inject IGroupService GroupService
+@inject IGameService GameService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <h2>@group.Name</h2>
+        </div>
+        <div class="control">
+            <button @onclick=@Back class="btn btn-secondary">Tillbaka</button>
+            <button @onclick=@ManageGroup class="btn btn-primary">Ändra</button>
+        </div>
+    </div>
+    <p>
+        @foreach (var user in users)
+        {
+            <span class="pr-2">@user.Username</span>
+        }
+    </p>
+    <div>
+        @foreach (var game in games)
+        {
+            <div class="bg-light my-3 game" @onclick="() => OpenGame(game.Id.Value)">
+                <img src="@game.ProfilePictureURL" />
+                <h2 class="game-name">@game.Name</h2>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int groupId { get; set; }
+
+    private GroupDTO group = new GroupDTO();
+    private List<GameDTO> games = new List<GameDTO>();
+    private List<UserDTO> users = new List<UserDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        group = await GroupService.GetGroup(groupId);
+        games = await GameService.GetGroupGames(groupId);
+        users = await GroupService.GetGroupUsers(groupId);
+    }
+
+    void OpenGame(int gameId)
+    {
+        NavigationManager.NavigateTo($"/game/{groupId}/{gameId}");
+    }
+
+    void ManageGroup()
+    {
+        NavigationManager.NavigateTo($"/manage/group/{groupId}");
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo($"/");
+    }
+} 

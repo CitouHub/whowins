@@ -1,0 +1,259 @@
+﻿@page "/manage/group/{groupId:int?}"
+
+@using Blazored.Typeahead
+@using VemVinner.Service;
+@using VemVinner.Domain;
+@using VemVinner.Domain.Account;
+
+@attribute [Authorize]
+@inject IAccountService AccountService
+@inject IGroupService GroupService
+@inject IGameService GameService
+@inject IAlertService AlertService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="card">
+        <h4 class="card-header">@(groupId != null ? "Uppdatera grupp" : "Skapa ny grupp")</h4>
+        <div class="card-body">
+            <EditForm Model="@group" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                <div class="form-group">
+                    <label>Gruppnamn</label>
+                    <InputText @bind-Value="group.Name" class="form-control" />
+                    <ValidationMessage For="@(() => group.Name)" />
+                </div>
+                <div class="form-group">
+                    <label>Beskrivning</label>
+                    <InputText @bind-Value="group.Description" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => group.Description)" />
+                </div>
+                <div class="form-group">
+                    @if (updateUsers)
+                    {
+                        <label>Lägg till användare</label>
+                        <BlazoredTypeahead SearchMethod="SearchUser"
+                                           MinimumLength="3"
+                                           TItem="UserDTO"
+                                           TValue="UserDTO"
+                                           Value="@selectedUser"
+                                           ValueExpression="@(() => selectedUser)"
+                                           ValueChanged="SelectUser">
+                            <SelectedTemplate Context="user">@user.Username</SelectedTemplate>
+                            <ResultTemplate Context="user">@user.Username</ResultTemplate>
+                            <NotFoundTemplate Context="user">Inga användare hittas</NotFoundTemplate>
+                        </BlazoredTypeahead>
+                    }
+                    else
+                    {
+                        <label>Användare</label>
+                        <div class="control">
+                            <div @onclick="@ToggleUpdateUsers" class="btn btn-primary">Ändra</div>
+                        </div>
+                    }
+                    @if (group.Users?.Any() == true)
+                    {
+                        @foreach (var user in group.Users)
+                        {
+                            <div class="group-user bg-info p-3 m-2">
+                                <span>@user.Username</span>
+                                @if (updateUsers)
+                                {
+                                    <button type="button" class="close pl-2" aria-label="Close" @onclick="() => RemoveUser(user)">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                }
+                            </div>
+
+                        }
+                    }
+                    <ValidationMessage For="@(() => group.Users)" />
+                </div>
+                <div class="form-group">
+                    @if (updateGames)
+                    {
+                        <label>Lägg till spel</label>
+                        <BlazoredTypeahead SearchMethod="SearchGame"
+                                           MinimumLength="3"
+                                           TItem="GameDTO"
+                                           TValue="GameDTO"
+                                           Value="@selectedGame"
+                                           ValueExpression="@(() => selectedGame)"
+                                           ValueChanged="SelectGame">
+                            <SelectedTemplate Context="game">@game.Name</SelectedTemplate>
+                            <ResultTemplate Context="game">@game.Name</ResultTemplate>
+                            <NotFoundTemplate Context="game">Inga spel hittas</NotFoundTemplate>
+                        </BlazoredTypeahead>
+                    }
+                    else
+                    {
+                        <label>Spel</label>
+                        <div class="control">
+                            <div @onclick="@ToggleUpdateGames" class="btn btn-primary">Ändra</div>
+                        </div>
+                    }
+                    @if (group.Games?.Any() == true)
+                    {
+                        @foreach (var game in group.Games)
+                        {
+                            <div class="group-user bg-info p-3 m-2">
+                                <span>@game.Name</span>
+                                @if (updateGames)
+                                {
+                                    <button type="button" class="close pl-2" aria-label="Close" @onclick="() => RemoveGame(game)">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+                    <ValidationMessage For="@(() => group.Games)" />
+                </div>
+                <button type="submit" disabled="@loading" class="btn btn-primary">
+                    @if (loading)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    @(groupId == null ? "Skapa" : "Uppdatera")
+                </button>
+                <NavLink href="@previousUrl" class="btn btn-link">Avbryt</NavLink>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? groupId { get; set; }
+
+    private GroupDTO group = new GroupDTO();
+    private UserDTO selectedUser = new UserDTO();
+    private GameDTO selectedGame = new GameDTO();
+    private bool loading;
+    private bool updateUsers;
+    private bool updateGames;
+
+    private string previousUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        updateUsers = groupId == null;
+        updateGames = groupId == null;
+        previousUrl = "/";
+        if (groupId != null)
+        {
+            previousUrl = $"/group/{groupId}";
+            group = await GroupService.GetGroup((int)groupId);
+            group.Users = (await GroupService.GetGroupUsers((int)groupId)).Where(_ => _.Id != AccountService.User.Id).ToList();
+            group.Games = await GroupService.GetGroupGames((int)groupId);
+        }
+    }
+
+    private async void OnValidSubmit()
+    {
+        // reset alerts on submit
+        AlertService.Clear();
+
+        loading = true;
+        var groupClone = group.Clone();
+        groupClone.Users.Add(AccountService.User);
+        if (groupId == null)
+        {
+            await GroupService.AddGroup(AccountService.User.Id, groupClone);
+            AlertService.Success("Grupp skapad", keepAfterRouteChange: true);
+        }
+        else
+        {
+            await GroupService.UpdateGroup(AccountService.User.Id, groupClone);
+            AlertService.Success("Grupp uppdaterad", keepAfterRouteChange: true);
+        }
+
+        NavigationManager.NavigateTo(previousUrl);
+    }
+
+    async Task<IEnumerable<UserDTO>> SearchUser(string username)
+    {
+        var selectUsers = new List<UserDTO>();
+        if (string.IsNullOrEmpty(username) == false)
+        {
+            var foundUsers = await AccountService.SearchUsers(username);
+            selectUsers = foundUsers.Where(_ => group.Users.Any(x => x.Id == _.Id) == false && _.Id != AccountService.User.Id).ToList();
+        }
+        return selectUsers;
+    }
+
+    async Task<IEnumerable<GameDTO>> SearchGame(string name)
+    {
+        var selectGames = new List<GameDTO>();
+        if (string.IsNullOrEmpty(name) == false)
+        {
+            var foundGames = await GameService.SearchGames(name);
+            selectGames = foundGames.Where(_ => group.Games.Any(x => x.Id == _.Id) == false).ToList();
+        }
+        return selectGames;
+    }
+
+    void ToggleUpdateUsers()
+    {
+        updateUsers = !updateUsers;
+    }
+
+    void ToggleUpdateGames()
+    {
+        updateGames = !updateGames;
+    }
+
+    void SelectUser(UserDTO user)
+    {
+        if (user != null)
+        {
+            group.Users.Add(user);
+            RemoveUser(group.DeactivateUsers, user);
+            selectedUser = new UserDTO();
+            StateHasChanged();
+        }
+    }
+
+    void SelectGame(GameDTO game)
+    {
+        if (game != null)
+        {
+            group.Games.Add(game);
+            RemoveGame(group.DeactivateGames, game);
+            selectedGame = new GameDTO();
+            StateHasChanged();
+        }
+    }
+
+    void RemoveUser(UserDTO user)
+    {
+        if (user != null)
+        {
+            RemoveUser(group.Users, user);
+            group.DeactivateUsers.Add(user);
+            StateHasChanged();
+        }
+    }
+
+    void RemoveGame(GameDTO game)
+    {
+        if (game != null)
+        {
+            RemoveGame(group.Games, game);
+            group.DeactivateGames.Add(game);
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveUser(List<UserDTO> userList, UserDTO user)
+    {
+        var existingUser = userList.FirstOrDefault(_ => _.Id == user.Id);
+        userList.Remove(existingUser);
+    }
+
+    private void RemoveGame(List<GameDTO> gameList, GameDTO game)
+    {
+        var existingGame = gameList.FirstOrDefault(_ => _.Id == game.Id);
+        gameList.Remove(existingGame);
+    }
+}

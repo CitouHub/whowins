@@ -1,0 +1,71 @@
+﻿@page "/account/login/{username?}"
+
+@using VemVinner.Service;
+@using VemVinner.Web.Helper;
+@using VemVinner.Domain.Account;
+
+@inject IAccountService AccountService
+@inject IAlertService AlertService
+@inject NavigationManager NavigationManager
+
+<div class="card">
+    <h4 class="card-header">Logga in</h4>
+    <div class="card-body">
+        <EditForm Model="@login" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>Användarnamn</label>
+                <InputText @bind-Value="login.Username" class="form-control" />
+                <ValidationMessage For="@(() => login.Username)" />
+            </div>
+            <div class="form-group">
+                <label>Lösenord</label>
+                <InputText @bind-Value="login.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => login.Password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Logga in
+            </button>
+            <NavLink href="account/register" class="btn btn-link">Registrera</NavLink>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string username { get; set; }
+
+    private LoginDTO login = new LoginDTO();
+    private bool loading;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(username) == false)
+        {
+            login.Username = username;
+        }
+    }
+
+    private async void OnValidSubmit()
+    {
+        AlertService.Clear();
+
+        loading = true;
+        await AccountService.Login(login);
+        if (AccountService.User != null)
+        {
+            var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+            NavigationManager.NavigateTo(returnUrl);
+        }
+        else
+        {
+            AlertService.Error("Användaren finns inte, eller felaktigt lösenord");
+        }
+        loading = false;
+        StateHasChanged();
+    }
+}

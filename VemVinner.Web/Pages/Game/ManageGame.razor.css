@@ -1,0 +1,15 @@
+img {
+    padding: 0.5rem;
+    border: solid 2px;
+    border-color: #FFFFFF;
+    cursor: pointer;
+}
+
+.selected-profile {
+    border-color: #1b6ec2;
+}
+
+.group-user {
+    display: inline-block;
+    border-radius: 10px;
+}

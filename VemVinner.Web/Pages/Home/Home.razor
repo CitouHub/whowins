@@ -1,0 +1,77 @@
+﻿@page "/"
+
+@using VemVinner.Service;
+@using VemVinner.Domain;
+
+@attribute [Authorize]
+@inject IAccountService AccountService
+@inject IGroupService GroupService
+@inject IAchievementService AchievementService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <h2>Hej @AccountService.User.Username!</h2>
+        </div>
+        <div class="control">
+            <button @onclick=@AddGroup class="btn btn-primary">+ Grupp</button>
+            <button @onclick=@AddGame class="btn btn-primary">+ Spel</button>
+        </div>
+    </div>
+    <div>
+        @if (groups.Any())
+        {
+            @foreach (var group in groups)
+            {
+                <div class="bg-light p-4 my-3 group dice" style="background:url('/images/dice/dice@(group.UsersInGroup > 9 ? 9 : group.UsersInGroup).png') no-repeat" @onclick="() => OpenGroup(group.Id)">
+                    <h2 class="group-name">@group.Name</h2>
+                </div>
+            }
+        }
+        else if (initializing == false)
+        {
+            <p>Du är inte med i några grupper</p>
+        }
+    </div>
+    <div class="subheader">
+        <div class="title achievement-title pt-4">
+            <h4>Achievements</h4>
+        </div>
+        <div>
+            @foreach (var achievement in achievements)
+            {
+                <img class="achievement-img" src="/images/achievement/A@(achievement.Id).png" title="@achievement.Description" />
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool initializing = true;
+
+    private List<GroupDTO> groups = new List<GroupDTO>();
+    private List<AchievementDTO> achievements = new List<AchievementDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        groups = await GroupService.GetGroups(AccountService.User.Id);
+        achievements = await AchievementService.GetUserAchievements(AccountService.User.Id);
+        initializing = false;
+    }
+
+    void AddGroup()
+    {
+        NavigationManager.NavigateTo("/manage/group");
+    }
+
+    void AddGame()
+    {
+        NavigationManager.NavigateTo("/manage/game");
+    }
+
+    void OpenGroup(int groupId)
+    {
+        NavigationManager.NavigateTo($"/group/{groupId}");
+    }
+} 

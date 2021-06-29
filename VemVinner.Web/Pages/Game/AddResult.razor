@@ -1,0 +1,106 @@
+﻿@page "/game/result/{groupId:int}/{gameId:int}"
+
+@attribute [Authorize]
+@inject NavigationManager NavigationManager
+@inject IAlertService AlertService
+@inject IAccountService AccountService
+@inject IGroupService GroupService
+@inject IGameService GameService
+
+@using Plk.Blazor.DragDrop;
+@using VemVinner.Domain;
+@using VemVinner.Service;
+
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <h2>Nytt resultat</h2>
+        </div>
+        <div class="control">
+            <button @onclick=@Back class="btn btn-secondary">Tillbaka</button>
+        </div>
+    </div>
+    <div class="pb-4">
+        <h3>Spelare</h3>
+        <Dropzone Items="gameResult" InstantReplace="true" TItem="GameUserScoreDTO" OnItemDrop="@(OnItemDrop)" OnReplacedItemDrop="@(OnReplacedItemDrop)">
+            <div class="form-group user-placement my-2 bg-light">
+                <img class="px-4 py-2" src="/images/placement@(GetPlacement(context)).png" />
+                <span>@context.Username</span>
+            </div>
+        </Dropzone>
+    </div>
+    <div class="pb-4">
+        <h3>Frånvarande</h3>
+        <Dropzone Items="absentPlayer" InstantReplace="true" TItem="GameUserScoreDTO" OnItemDrop="@(OnItemDrop)" OnReplacedItemDrop="@(OnReplacedItemDrop)" Class="absent">
+            <div class="form-group user-placement my-2 bg-light">
+                <img class="px-4 py-2" src="/images/absent.png" />
+                <span>@context.Username</span>
+            </div>
+        </Dropzone>
+    </div>
+
+    <button @onclick=@SaveResult class="btn btn-primary">Spara</button>
+</div>
+
+@code {
+    [Parameter]
+    public int groupId { get; set; }
+    [Parameter]
+    public int gameId { get; set; }
+
+    private List<GameUserScoreDTO> gameResult = new List<GameUserScoreDTO>();
+    private List<GameUserScoreDTO> absentPlayer = new List<GameUserScoreDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var users = await GroupService.GetGroupUsers((int)groupId);
+        gameResult = users.Select(_ => new GameUserScoreDTO()
+        {
+            UserId = _.Id,
+            Username = _.Username
+        }).ToList();
+        StateHasChanged();
+    }
+
+    public void OnItemDrop()
+    {
+        StateHasChanged();
+    }
+
+    public void OnReplacedItemDrop()
+    {
+        StateHasChanged();
+    }
+
+    public string GetPlacement(GameUserScoreDTO user)
+    {
+        var index = gameResult.IndexOf(user);
+        if (index >= 3)
+        {
+            return "None";
+        }
+        else
+        {
+            return (index + 1).ToString();
+        }
+    }
+
+    async Task SaveResult()
+    {
+        if (gameResult.Count() >= 2)
+        {
+            await GameService.SaveResult(AccountService.User.Id, groupId, gameId, gameResult);
+            AlertService.Success("Nytt resultat registrerat", keepAfterRouteChange: true);
+            NavigationManager.NavigateTo($"/game/{groupId}/{gameId}");
+        }
+        else
+        {
+            AlertService.Error("Minst två spelare måste vara med!");
+        }
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo($"/game/{groupId}/{gameId}");
+    }
+} 

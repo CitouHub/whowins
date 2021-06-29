@@ -1,0 +1,34 @@
+﻿@page "/open"
+
+@using VemVinner.Service;
+@using VemVinner.Web.Helper;
+
+@inject IAccountService AccountService
+@inject NavigationManager NavigationManager
+
+<div class="p-4">
+    <div class="container">
+        <div class="header">
+            <div class="title">
+                <h1>Vem vinner?!...</h1>
+                <p>(Vänta lite...)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var returnUrl = NavigationManager.QueryString("returnUrl") ?? "";
+        await AccountService.Initialize();
+        if (AccountService.User != null)
+        {
+            NavigationManager.NavigateTo(returnUrl);
+        }
+        else
+        {
+            NavigationManager.NavigateTo($"account/login/?returnUrl={returnUrl}");
+        }
+    }
+}

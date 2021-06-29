@@ -1,0 +1,142 @@
+﻿@page "/game/{groupId:int}/{gameId:int}"
+
+@using VemVinner.Service;
+@using VemVinner.Domain;
+@using BlazorPro.BlazorSize;
+
+@attribute [Authorize]
+@inject IResizeListener listener
+@inject IAccountService AccountService
+@inject IGroupService GroupService
+@inject IGameService GameService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="header">
+        <div class="title">
+            <h2>@game.Name</h2>
+        </div>
+        <div class="control">
+            <button @onclick=@Back class="btn btn-secondary">Tillbaka</button>
+            <button @onclick=@ManageGame class="btn btn-primary">Ändra</button>
+        </div>
+    </div>
+    @if (groupGameUserPlacements.Any() || groupGameEvents.Any())
+    {
+        <div class="placement">
+            <h3>Ställning</h3>
+            @for (int placement = 1; placement <= groupGameUserPlacements.Count(); placement++)
+            {
+                <div>
+                    <p>
+                        <img src="/images/placement@(placement).png" />
+                        @groupGameUserPlacements[placement - 1].Username (@groupGameUserPlacements[placement - 1].Score)
+                    </p>
+                </div>
+            }
+        </div>
+        <div class="game-events">
+            <div class="subheader">
+                <div class="title">
+                    <h3>Senaste omgångar</h3>
+                </div>
+                <div class="control">
+                    <button @onclick=@NewEvent class="btn btn-primary">+ Omgång</button>
+                </div>
+            </div>
+
+            <table>
+                @foreach (var gameEvent in groupGameEvents)
+                {
+                    <tr>
+                        <td>@gameEvent.EventTime.ToString("yyyy-MM-dd")</td>
+                        @for (var placement = 1; placement <= GetPlacementLimit(gameEvent.UserPlacements.Count); placement++)
+                        {
+                            <td><img src="/images/placement@(placement).png" /></td>
+                            <td>@gameEvent.UserPlacements[placement - 1].Username</td>
+                        }
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+    else
+    {
+        <h3>Inga registrerade omgångar</h3>
+        <div class="control">
+            <button @onclick=@NewEvent class="btn btn-primary">+ Omgång</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int groupId { get; set; }
+    [Parameter]
+    public int gameId { get; set; }
+
+    private GameDTO game = new GameDTO();
+    private List<GroupGameUserPlacementDTO> groupGameUserPlacements = new List<GroupGameUserPlacementDTO>();
+    private List<GroupGameEventDTO> groupGameEvents = new List<GroupGameEventDTO>();
+
+    private bool IsSmall, IsXSmall = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await UpdateMediaMatch();
+
+        game = await GameService.GetGame(gameId);
+        groupGameUserPlacements = await GameService.GetGroupGameUserPlacements(groupId, gameId);
+        groupGameEvents = await GameService.GetGroupGameEvents(groupId, gameId, 10);
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            listener.OnResized += WindowResized;
+        }
+    }
+
+    async void WindowResized(object _, BrowserWindowSize window)
+    {
+        await UpdateMediaMatch();
+    }
+
+    private async Task UpdateMediaMatch()
+    {
+        IsSmall = await listener.MatchMedia(Breakpoints.SmallDown);
+        IsXSmall = await listener.MatchMedia(Breakpoints.XSmallDown);
+
+        StateHasChanged();
+    }
+
+    int GetPlacementLimit(int placementCount)
+    {
+        if (IsXSmall)
+        {
+            return 2;
+        }
+        else if (IsSmall)
+        {
+            return 2;
+        }
+
+        return placementCount;
+    }
+
+    void NewEvent()
+    {
+        NavigationManager.NavigateTo($"/game/result/{groupId}/{gameId}");
+    }
+
+    void ManageGame()
+    {
+        NavigationManager.NavigateTo($"/manage/game/{groupId}/{gameId}");
+    }
+
+    void Back()
+    {
+        NavigationManager.NavigateTo($"/group/{groupId}");
+    }
+} 

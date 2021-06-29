@@ -1,0 +1,24 @@
+.dice {
+    height: 6rem !important;
+    background-size: auto calc(100% - 1.5rem) !important;
+    background-position: calc(100% - 1rem) center !important;
+}
+
+.group {
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 2px 3px 4px #888888;
+}
+
+.group-name {
+    padding-top: 0.2rem;
+}
+
+.achievement-title {
+    width: 100%;
+}
+
+.achievement-img {
+    padding: 0.5rem;
+    height: 4rem;
+}

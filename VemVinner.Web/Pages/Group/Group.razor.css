@@ -1,0 +1,22 @@
+img {
+    border-radius: 20px 0 0 20px;
+    height: 100%;
+    float: left;
+    -webkit-mask-image: -webkit-gradient(linear, left top, right top, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));
+    mask-image: linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+span {
+    font-weight: 600;
+}
+
+.game-name {
+    padding: 1.8rem;
+}
+
+.game {
+    border-radius: 20px;
+    height: 6rem;
+    box-shadow: 2px 3px 4px #888888;
+    cursor: pointer;
+}

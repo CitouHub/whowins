@@ -1,0 +1,17 @@
+td {
+    padding-right: 1rem;
+}
+
+img {
+    height: 2rem;
+}
+
+.placement {
+    width: 100%;
+    text-align: center;
+}
+
+.game-event {
+    width: 100%;
+    text-align: center;
+}
