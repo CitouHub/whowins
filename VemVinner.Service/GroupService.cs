@@ -43,6 +43,11 @@ namespace VemVinner.Service
 
         public async Task AddGroup(int userId, GroupDTO group)
         {
+            foreach (var newUser in group.Users.Where(_ => _.Id == -1))
+            {
+                newUser.Id = await _accountService.RegisterProxy(userId, newUser.Username);
+            }
+
             var newGroup = new Group()
             {
                 InsertByUser = userId,
@@ -58,7 +63,8 @@ namespace VemVinner.Service
                 {
                     InsertByUser = userId,
                     GroupId = newGroup.Id,
-                    UserId = user.Id
+                    UserId = user.Id,
+                    InvitationAccepted = userId == user.Id
                 });
             }
             foreach (var game in group.Games)
