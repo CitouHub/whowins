@@ -7,6 +7,7 @@ namespace VemVinner.Domain
         public int? Id { get; set; }
 
         [Required(ErrorMessage = "Du måste ange ett namn")]
+        [MinLength(3, ErrorMessage = "Namnet är för kort")]
         [MaxLength(20, ErrorMessage = "Namnet är för långt")]
         public string Name { get; set; }
 

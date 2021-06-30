@@ -30,8 +30,9 @@ CREATE TABLE [dbo].[User](
 	[UpdateDate] [datetime2](7) NULL,
 	[UpdateByUser] [int] NULL,
 	[Username] [nvarchar](20) NOT NULL,
-	[Password] [nvarchar](500) NOT NULL,
-	[PasswordSalt] [varbinary](100) NOT NULL,
+	[Password] [nvarchar](500) NULL,
+	[PasswordSalt] [varbinary](100) NULL,
+	[IsProxy] [bit] NOT NULL DEFAULT(0),
 	[IsActive] [bit] NOT NULL DEFAULT(1)
  CONSTRAINT [User_PK] PRIMARY KEY CLUSTERED 
 (
@@ -97,6 +98,12 @@ ALTER TABLE [dbo].[UserAchievement] WITH CHECK ADD CONSTRAINT [UserAchievement_U
 GO
 ALTER TABLE [dbo].[UserAchievement] WITH CHECK ADD CONSTRAINT [UserAchievement_AchievementFK] FOREIGN KEY([AchievementId]) REFERENCES [dbo].[Achievement] ([Id])
 GO
+CREATE UNIQUE NONCLUSTERED INDEX [IdxUserAchievement_Unique] ON [dbo].[UserAchievement]
+(
+    [UserId] ASC,
+	[AchievementId] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+GO
 
 CREATE TABLE [dbo].[Group](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
@@ -130,6 +137,12 @@ CREATE TABLE [dbo].[GroupUser](
 ALTER TABLE [dbo].[GroupUser] WITH CHECK ADD CONSTRAINT [GroupUser_GroupFK] FOREIGN KEY([GroupId]) REFERENCES [dbo].[Group] ([Id])
 GO
 ALTER TABLE [dbo].[GroupUser] WITH CHECK ADD CONSTRAINT [GroupUser_UserFK] FOREIGN KEY([UserId]) REFERENCES [dbo].[User] ([Id])
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IdxGroupUser_Unique] ON [dbo].[GroupUser]
+(
+    [GroupId] ASC,
+	[UserId] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 GO
 
 CREATE TABLE [dbo].[Game](
@@ -170,6 +183,12 @@ ALTER TABLE [dbo].[GroupGame] WITH CHECK ADD CONSTRAINT [GroupGame_GroupFK] FORE
 GO
 ALTER TABLE [dbo].[GroupGame] WITH CHECK ADD CONSTRAINT [GroupGame_GameFK] FOREIGN KEY([GameId]) REFERENCES [dbo].[Game] ([Id])
 GO
+CREATE UNIQUE NONCLUSTERED INDEX [IdxGroupGame_Unique] ON [dbo].[GroupGame]
+(
+    [GroupId] ASC,
+	[GameId] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+GO
 
 CREATE TABLE [dbo].[GroupGameEvent](
 	[Id] [int] IDENTITY(1,1) NOT NULL,
@@ -207,4 +226,10 @@ CREATE TABLE [dbo].[GroupGameEventUserResult](
 ALTER TABLE [dbo].[GroupGameEventUserResult] WITH CHECK ADD CONSTRAINT [GroupGameEventUserResult_GroupGameEventFK] FOREIGN KEY([GroupGameEventId]) REFERENCES [dbo].[GroupGameEvent] ([Id])
 GO
 ALTER TABLE [dbo].[GroupGameEventUserResult] WITH CHECK ADD CONSTRAINT [GroupGameEventUserResult_UserFK] FOREIGN KEY([UserId]) REFERENCES [dbo].[User] ([Id])
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IdxGroupGameEventUserResult_Unique] ON [dbo].[GroupGameEventUserResult]
+(
+    [GroupGameEventId] ASC,
+	[UserId] ASC
+) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
 GO

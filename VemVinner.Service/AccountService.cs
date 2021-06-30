@@ -22,6 +22,7 @@ namespace VemVinner.Service
         Task Initialize();
         Task Login(LoginDTO login);
         Task<bool> UserExists(string username);
+        Task<int> RegisterProxy(int userId, string username);
         Task Register(RegisterUserDTO registerUser);
         Task<List<UserDTO>> SearchUsers(string username);
     }
@@ -30,7 +31,7 @@ namespace VemVinner.Service
     {
         public UserDTO User { get; private set; }
 
-        private string _userKey = "WhoWinsUser";
+        private readonly string _userKey = "WhoWinsUser";
         private readonly WhoWinsDbContext _context;
         private readonly IMapper _mapper;
         private readonly ILocalStorageService _localStorageService;
@@ -81,28 +82,52 @@ namespace VemVinner.Service
 
         public async Task<bool> UserExists(string username)
         {
-            return await _context.Users.AnyAsync(_ => _.Username == username);
+            return await _context.Users.AnyAsync(_ => _.Username == username && _.IsProxy == false);
         }
 
         public async Task Register(RegisterUserDTO registerUser)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(_ => _.Username == registerUser.Username && _.IsProxy == true);
+            if(user == null)
+            {
+                user = new User()
+                {
+                    Username = registerUser.Username,
+                };
+
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+            }
+
             var salt = new byte[128 / 8];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(salt);
             }
 
+            user.UpdateByUser = user.Id;
+            user.UpdateDate = DateTime.UtcNow;
+            user.Password = GetPasswordHash(registerUser.Password, salt);
+            user.PasswordSalt = salt;
+
+            await _context.SaveChangesAsync();
+
+            await _achievementService.AddUserAchievement(user.Id, AchievementType.Registered);
+        }
+
+        public async Task<int> RegisterProxy(int userId, string username)
+        {
             var newUser = new User()
             {
-                Username = registerUser.Username,
-                Password = GetPasswordHash(registerUser.Password, salt),
-                PasswordSalt = salt
+                InsertByUser = userId,
+                Username = username,
+                IsProxy = true
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            await _achievementService.AddUserAchievement(newUser.Id, AchievementType.Registered);
+            return newUser.Id;
         }
 
         private static string GetPasswordHash(string password, byte[] salt)

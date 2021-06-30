@@ -1,13 +1,16 @@
 .dice {
-    height: 6rem !important;
     background-size: auto calc(100% - 1.5rem) !important;
     background-position: calc(100% - 1rem) center !important;
 }
 
 .group {
+    height: 6rem !important;
     border-radius: 20px;
-    cursor: pointer;
     box-shadow: 2px 3px 4px #888888;
+}
+
+.clickable {
+    cursor: pointer;
 }
 
 .group-name {
@@ -16,6 +19,12 @@
 
 .achievement-title {
     width: 100%;
+}
+
+.answer-img {
+    height: 3rem;
+    margin-top: 1.5rem;
+    margin-right: 1rem;
 }
 
 .achievement-img {

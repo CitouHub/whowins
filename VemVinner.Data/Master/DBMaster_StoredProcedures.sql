@@ -42,10 +42,12 @@ BEGIN
 		[Group].Id, 
 		[Group].Name, 
 		[Group].Description,
+		GroupUser.InvitationAccepted,
 		(SELECT COUNT(*) FROM GroupUser AS GU WHERE GU.GroupId = GroupUser.GroupId) AS UsersInGroup
 	FROM GroupUser
 		INNER JOIN [Group] ON GroupUser.GroupId = [Group].Id
 	WHERE GroupUser.UserId = @UserId
+		AND GroupUser.IsActive = 1
 	ORDER BY Name ASC
 END
 GO

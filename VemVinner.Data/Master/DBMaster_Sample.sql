@@ -11,29 +11,29 @@ DELETE Game
 SET IDENTITY_INSERT [User] ON
 GO
 INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (1, 'Rikard', N'mf28LcCk4ctask5UGNJ1cINDwUAox6VONgz8gmeNaTk=', 0xDEFAE59816540B36D35FC02F100AB215)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (2, 'Jossan', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (3, 'Viktor', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (4, 'Annika', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (5, 'Jan-Åke', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (6, 'Albin', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (7, 'Petter', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (8, 'Matthias', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (9, 'Pauly', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (10, 'Gustav', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (11, 'Ricke', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (12, 'Eric', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (13, 'Pelle', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (14, 'Johan', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (15, 'Nisse', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (16, 'Sven', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (17, 'Kalle', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (18, 'Marcus', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (19, 'Bosse', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (20, 'Leia', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (21, 'Noah', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (22, 'Emma', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (23, 'Jacob', 'Test', 0x0)
-INSERT INTO [User]([Id], [Username], [Password], [PasswordSalt]) VALUES (24, 'Henrik', 'Test', 0x0)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (2, 'Jossan', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (3, 'Viktor', 1) 
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (4, 'Annika',  1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (5, 'Jan-Åke', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (6, 'Albin', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (7, 'Petter', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (8, 'Matthias', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (9, 'Pauly', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (10, 'Gustav', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (11, 'Ricke', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (12, 'Eric', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (13, 'Pelle', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (14, 'Johan', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (15, 'Nisse', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (16, 'Sven', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (17, 'Kalle', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (18, 'Marcus', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (19, 'Bosse', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (20, 'Leia', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (21, 'Noah', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (22, 'Emma', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (23, 'Jacob', 1)
+INSERT INTO [User]([Id], [Username], [IsProxy]) VALUES (24, 'Henrik', 1)
 SET IDENTITY_INSERT [User] OFF
 GO
 
@@ -47,8 +47,7 @@ INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (5, 'Chicago', '/im
 INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (6, 'Vem vet mäst', '/images/game/game11.png')
 INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (7, 'Kalaha', '/images/game/game6.png')
 INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (8, 'Plump', '/images/game/game9.png')
-INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (9, 'Sten, sax, och påse', '/images/game/game10.png')
-INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (10, 'Rummy', '/images/game/game9.png')
+INSERT INTO [Game]([Id], [Name], [ProfilePictureURL]) VALUES (9, 'Rummy', '/images/game/game9.png')
 SET IDENTITY_INSERT [Game] OFF
 GO
 
@@ -86,7 +85,7 @@ INSERT INTO [GroupUser](GroupId, UserId) VALUES (5, 24)
 
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (1, 6)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (1, 8)
-INSERT INTO [GroupGame](GroupId, GameId) VALUES (1, 10)
+INSERT INTO [GroupGame](GroupId, GameId) VALUES (1, 9)
 
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (2, 1)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (2, 4)
@@ -100,7 +99,6 @@ INSERT INTO [GroupGame](GroupId, GameId) VALUES (3, 6)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (3, 7)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (3, 8)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (3, 9)
-INSERT INTO [GroupGame](GroupId, GameId) VALUES (3, 10)
 
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (4, 1)
 INSERT INTO [GroupGame](GroupId, GameId) VALUES (4, 4)
@@ -153,6 +151,7 @@ BEGIN
 	SELECT @UserId, Id FROM @A
 	WHERE CAST(SUBSTRING(GuidSeed, PATINDEX('%[0-9]%', GuidSeed), 1) AS INT) % 3 = 0
 
+	DELETE @A
 	FETCH NEXT FROM user_cursor INTO @UserId
 END 
 

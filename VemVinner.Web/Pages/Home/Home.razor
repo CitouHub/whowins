@@ -22,9 +22,19 @@
     <div>
         @if (groups.Any())
         {
-            @foreach (var group in groups)
+            @foreach (var group in groups.Where(_ => _.InvitationAccepted == false))
             {
-                <div class="bg-light p-4 my-3 group dice" style="background:url('/images/dice/dice@(group.UsersInGroup > 9 ? 9 : group.UsersInGroup).png') no-repeat" @onclick="() => OpenGroup(group.Id)">
+                <div class="bg-light my-3 group">
+                    <h2 class="group-name m-4 float-left">Inbjudan: @group.Name</h2>
+                    <div class="float-right">
+                        <img class="answer-img clickable" src="/images/no.png" @onclick="() => AnswerGroupInvitation(group, false)" />
+                        <img class="answer-img clickable" src="/images/yes.png" @onclick="() => AnswerGroupInvitation(group, true)" />
+                    </div>
+                </div>
+            }
+            @foreach (var group in groups.Where(_ => _.InvitationAccepted))
+            {
+                <div class="bg-light p-4 my-3 group dice clickable" style="background:url('/images/dice/dice@(group.UsersInGroup > 9 ? 9 : group.UsersInGroup).png') no-repeat" @onclick="() => OpenGroup(group.Id)">
                     <h2 class="group-name">@group.Name</h2>
                 </div>
             }
@@ -73,5 +83,16 @@
     void OpenGroup(int groupId)
     {
         NavigationManager.NavigateTo($"/group/{groupId}");
+    }
+
+    async Task AnswerGroupInvitation(GroupDTO group, bool accept)
+    {
+        await GroupService.AnswerGroupInvitation(AccountService.User.Id, group.Id, accept);
+        group.InvitationAccepted = accept;
+        if (accept == false)
+        {
+            groups.Remove(group);
+        }
+        StateHasChanged();
     }
 } 

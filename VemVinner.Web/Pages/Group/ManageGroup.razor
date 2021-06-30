@@ -40,8 +40,8 @@
                                            ValueExpression="@(() => selectedUser)"
                                            ValueChanged="SelectUser">
                             <SelectedTemplate Context="user">@user.Username</SelectedTemplate>
-                            <ResultTemplate Context="user">@user.Username</ResultTemplate>
-                            <NotFoundTemplate Context="user">Inga användare hittas</NotFoundTemplate>
+                            <ResultTemplate Context="user">@(user.Id != -1 ? user.Username : user.Username + " (Ny)")</ResultTemplate>
+                            <NotFoundTemplate Context="user">Användaren är redan inlagd</NotFoundTemplate>
                         </BlazoredTypeahead>
                     }
                     else
@@ -179,6 +179,17 @@
             var foundUsers = await AccountService.SearchUsers(username);
             selectUsers = foundUsers.Where(_ => group.Users.Any(x => x.Id == _.Id) == false && _.Id != AccountService.User.Id).ToList();
         }
+
+        if(selectUsers.Any(_ => _.Username.ToLower() == username.ToLower()) == false &&
+            group.Users.Any(_ => _.Username.ToLower() == username.ToLower()) == false)
+        {
+            selectUsers.Add(new UserDTO()
+            {
+                Id = -1,
+                Username = username
+            });
+        }
+
         return selectUsers;
     }
 

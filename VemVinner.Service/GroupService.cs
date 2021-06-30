@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -21,19 +22,23 @@ namespace VemVinner.Service
         Task<List<GroupDTO>> GetGroups(int userId);
         Task<List<UserDTO>> GetGroupUsers(int groupId);
         Task<List<GameDTO>> GetGroupGames(int groupId);
+        Task AnswerGroupInvitation(int userId, int groupId, bool accept);
     }
 
     public class GroupService : IGroupService
     {
         private readonly WhoWinsDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
         public GroupService(
             WhoWinsDbContext context,
-            IMapper mapper) 
+            IMapper mapper,
+            IAccountService accountService) 
         {
             _context = context;
             _mapper = mapper;
+            _accountService = accountService;
         }
 
         public async Task AddGroup(int userId, GroupDTO group)
@@ -77,6 +82,11 @@ namespace VemVinner.Service
                 _mapper.Map(groupUpdate, group);
                 group.UpdateByUser = userId;
                 group.UpdateDate = DateTime.UtcNow;
+
+                foreach(var newUser in groupUpdate.Users.Where(_ => _.Id == -1))
+                {
+                    newUser.Id = await _accountService.RegisterProxy(userId, newUser.Username);
+                }
 
                 foreach (var user in groupUpdate.Users)
                 {
@@ -173,6 +183,20 @@ namespace VemVinner.Service
         {
             var groupGames = await _context.sp_getGroupGames(groupId);
             return _mapper.Map<List<GameDTO>>(groupGames);
+        }
+
+        public async Task AnswerGroupInvitation(int userId, int groupId, bool accept)
+        {
+            var group = await _context.GroupUsers.FirstOrDefaultAsync(_ => _.GroupId == groupId && _.UserId == userId);
+            group.UpdateByUser = userId;
+            group.UpdateDate = DateTime.UtcNow;
+            group.InvitationAccepted = accept;
+            if (accept == false)
+            {
+                group.IsActive = false;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

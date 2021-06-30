@@ -22,6 +22,7 @@ namespace VemVinner.Data
         public string Username { get; set; }
         public string Password { get; set; }
         public byte[] PasswordSalt { get; set; }
+        public bool IsProxy { get; set; }
         public bool? IsActive { get; set; }
 
         public virtual ICollection<GroupGameEventUserResult> GroupGameEventUserResults { get; set; }

@@ -89,6 +89,9 @@ namespace VemVinner.Data
             {
                 entity.ToTable("GroupGame");
 
+                entity.HasIndex(e => new { e.GroupId, e.GameId }, "IdxGroupGame_Unique")
+                    .IsUnique();
+
                 entity.Property(e => e.InsertByUser).HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.InsertDate).HasDefaultValueSql("(getutcdate())");
@@ -139,6 +142,9 @@ namespace VemVinner.Data
             {
                 entity.ToTable("GroupGameEventUserResult");
 
+                entity.HasIndex(e => new { e.GroupGameEventId, e.UserId }, "IdxGroupGameEventUserResult_Unique")
+                    .IsUnique();
+
                 entity.Property(e => e.InsertByUser).HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.InsertDate).HasDefaultValueSql("(getutcdate())");
@@ -159,6 +165,9 @@ namespace VemVinner.Data
             modelBuilder.Entity<GroupUser>(entity =>
             {
                 entity.ToTable("GroupUser");
+
+                entity.HasIndex(e => new { e.GroupId, e.UserId }, "IdxGroupUser_Unique")
+                    .IsUnique();
 
                 entity.Property(e => e.InsertByUser).HasDefaultValueSql("((1))");
 
@@ -196,13 +205,9 @@ namespace VemVinner.Data
                     .IsRequired()
                     .HasDefaultValueSql("((1))");
 
-                entity.Property(e => e.Password)
-                    .IsRequired()
-                    .HasMaxLength(500);
+                entity.Property(e => e.Password).HasMaxLength(500);
 
-                entity.Property(e => e.PasswordSalt)
-                    .IsRequired()
-                    .HasMaxLength(100);
+                entity.Property(e => e.PasswordSalt).HasMaxLength(100);
 
                 entity.Property(e => e.Username)
                     .IsRequired()
@@ -212,6 +217,9 @@ namespace VemVinner.Data
             modelBuilder.Entity<UserAchievement>(entity =>
             {
                 entity.ToTable("UserAchievement");
+
+                entity.HasIndex(e => new { e.UserId, e.AchievementId }, "IdxUserAchievement_Unique")
+                    .IsUnique();
 
                 entity.Property(e => e.InsertByUser).HasDefaultValueSql("((1))");
 

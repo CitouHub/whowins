@@ -11,6 +11,7 @@ namespace VemVinner.Domain
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Du måste ange ett namn")]
+        [MinLength(3, ErrorMessage = "Namnet är för kort")]
         [MaxLength(20, ErrorMessage = "Namnet är för långt")]
         public string Name { get; set; }
 
@@ -26,6 +27,8 @@ namespace VemVinner.Domain
         public List<UserDTO> DeactivateUsers { get; set; } = new List<UserDTO>();
 
         public List<GameDTO> DeactivateGames { get; set; } = new List<GameDTO>();
+
+        public bool InvitationAccepted { get; set; }
 
         public int UsersInGroup { get; set; }
     }
